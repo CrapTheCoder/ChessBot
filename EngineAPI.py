@@ -1,5 +1,4 @@
 from random import choice
-from snake
 
 """
 Write your code in this file to participate in the Chess Bot challenge!
@@ -12,6 +11,8 @@ from ContestUtils import files, ranks
 WHITE = PlayerColour.White
 BLACK = PlayerColour.Black
 EMPTY = BoardPiece.EmptySquare
+
+STARTING_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
 
 Pieces = {
     WHITE: [BoardPiece.WhitePawn, BoardPiece.WhiteRook, BoardPiece.WhiteKnight,
@@ -237,7 +238,7 @@ class Engine:
 
                 eval_cur = Engine.minimax(board_copy, WHITE, depth - 1, alpha, beta)
                 eval_min = eval_cur if eval_cur < eval_min else eval_min
-                beta = eval_cur if eval_cur < alpha else beta
+                beta = eval_cur if eval_cur < beta else beta
                 if beta <= alpha:
                     break
 
@@ -247,12 +248,12 @@ class Engine:
     def get_minimax_move(board, colour):
         legal_moves = Engine.get_legal_moves(board, colour)
 
-        max_eval, max_eval_moves = -1e5 if colour == WHITE else 1e5, []
+        max_eval, max_eval_moves = -INF if colour == WHITE else INF, []
         for move in legal_moves:
             board_copy = board.copy()
             Engine.make_move(board_copy, *move)
 
-            evaluation = Engine.minimax(board_copy, colour, 2)
+            evaluation = Engine.minimax(board_copy, Engine.get_opponent_colour(colour), 2)
 
             if (colour == WHITE and evaluation > max_eval) or (colour == BLACK and evaluation < max_eval):
                 max_eval, max_eval_moves = evaluation, [move]
@@ -304,7 +305,6 @@ class Engine:
         minimax_move = self.get_minimax_move(self.board, self.colour)
         self.make_move(self.board, *minimax_move)
 
-        print(self.convert_board(self.board))
         return self.convert_board(self.board)
 
     def legal_move_tester(self, board_state):
@@ -354,24 +354,33 @@ class Engine2(Engine):
         return self.convert_board(self.board)
 
 
-if __name__ == '__main__':
+def main():
+    import cProfile
+    import pstats
+
     c = 0
-    eb = Engine(WHITE, 5)
-    ew = Engine2(BLACK, 5, False)
-    b = BoardState.from_fen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')
+    ew = Engine(WHITE, 5)
+    # eb = Engine2(BLACK, 5, False)
+    b = BoardState.from_fen(STARTING_FEN)
 
-    while True:
-        c += 1
-        print(c)
+    print(ew.get_move(b))
 
-        b = ew.get_move(b)
-        if b is None:
-            break
+    # while True:
+    #     c += 1
+    #     print(c)
+    #
+    #     b = ew.get_move(b)
+    #     if b is None:
+    #         break
+    #
+    #     print('-' * 50)
+    #
+    #     b = eb.get_move(b)
+    #     if b is None:
+    #         break
+    #
+    #     print('-' * 50)
 
-        print('-' * 50)
 
-        b = eb.get_move(b)
-        if b is None:
-            break
-
-        print('-' * 50)
+if __name__ == '__main__':
+    main()
